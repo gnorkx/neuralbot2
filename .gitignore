@@ -26,3 +26,7 @@
 *.exe
 *.out
 *.app
+
+#Codeblock files
+*.cbp
+*.cbp.safe-failed
