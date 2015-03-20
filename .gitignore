@@ -29,4 +29,4 @@
 
 #Codeblock files
 *.cbp
-*.cbp.safe-failed
+*.save-failed
