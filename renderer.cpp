@@ -15,6 +15,9 @@ void renderer::Init(iTuple resolution, char *name, int scr_bpp)
     resolution_ = resolution;
     screen_ = SDL_SetVideoMode( resolution_.x, resolution_.y, scr_bpp, SDL_SWSURFACE );
     SDL_WM_SetCaption( name , NULL );
+    scale_ = 7;
+    shift_.x = -resolution_.x/2.;
+    shift_.y = -resolution_.y/2.;
 }
 
 
@@ -94,9 +97,7 @@ Uint32 renderer::GetPixel(SDL_Surface* s, iTuple Pos)
 
 iTuple renderer::Pos2Pix(Coord Pos)
 {
-    Pos.x -= shift_.x;
-    Pos.y -= shift_.y;
-    return iTuple(Size2Pix(Pos.x),Size2Pix(Pos.y));
+    return iTuple(Size2Pix(Pos.x)-shift_.x,Size2Pix(Pos.y)-shift_.y);
 }
 
 int renderer::Size2Pix(float l)

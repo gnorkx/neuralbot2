@@ -16,6 +16,5 @@ food::~food()
 
 void food::update()
 {
-    std::cout<<"food update"<<endl;
     renderer::Instance()->Circle(Pos_,size_, c_);
 }
