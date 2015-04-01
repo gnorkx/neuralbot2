@@ -22,14 +22,15 @@ class renderer
 
         ~renderer();
 
-        renderer* Instance();
-        void Init(iTuple&, string&, int scr_bpp = 32);
+        static renderer* Instance();
+        void Init(iTuple, char*, int scr_bpp = 32);
 
         void ClearScreen();
-        void Rect(fTuple, fTuple, color);
-        void Square(fTuple, float, color);
-        void Circle(fTuple, float, color);
-        void Line(fTuple, fTuple, color);
+        void Flip();
+        void Rect(Coord, Coord, color);
+        void Square(Coord, float, color);
+        void Circle(Coord, float, color);
+        void Line(Coord, Coord, color);
 
     private:
 
@@ -42,9 +43,9 @@ class renderer
         void DrawCircle(iTuple, float, color);
         void DrawLine(iTuple, iTuple, color);
 
-        iTuple Pos2Pix(fTuple);
+        iTuple Pos2Pix(Coord);
         int Size2Pix(float);
-        iTuple Size2Pix(fTuple);
+        iTuple Size2Pix(Coord);
 
 
         renderer();

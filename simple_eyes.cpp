@@ -13,7 +13,7 @@ simple_eyes::~simple_eyes()
     delete[] value_;
 }
 
-void simple_eyes::update(bot &bot_, int &nVal, float *Value)
+void simple_eyes::update(const bot &bot_, int &nVal, float *&Value)
 {
 
 //    std::partial_sort(gWorld.begin(),
@@ -26,20 +26,27 @@ void simple_eyes::update(bot &bot_, int &nVal, float *Value)
 //                                if(fabs(Diff_b.x)>gWorldX) Diff_b.x -= 2*signum(Diff_b.x)*gWorldX;
 //                                if(fabs(Diff_b.y)>gWorldY) Diff_b.y -= 2*signum(Diff_b.y)*gWorldY;
 //                                return Diff_a.abs()<Diff_b.abs();}
-//                                );
-    std::partial_sort(gWorld.begin(),
-        gWorld.begin()+1,
-        gWorld.end(),
-        [=]( object *a,  object *b){return a->Pos_.abs()<b->Pos_.abs();});
-//{ Coord Diff_a = a.Pos_ - bot_.Pos_;
-//                                 Coord Diff_b = b.Pos_ - bot_.Pos_;
-//                                return Diff_a.abs()<Diff_b.abs();}
-//                                );
+//  );
 
-    Coord Diff = gWorld[0]->Pos_ - bot_.Pos_;
-    value_[0] = Diff.x;
-    value_[1] = Diff.y;
-    nVal =nVal_;
+    if(gWorld.size()>0)
+    {
+        std::partial_sort(gWorld.begin(),
+            gWorld.begin()+1,
+            gWorld.end(),
+            [=]( object *a,  object *b){ Coord Diff_a = a->Pos_ - bot_.Pos_;
+                                 Coord Diff_b = b->Pos_ - bot_.Pos_;
+                                return Diff_a.abs()<Diff_b.abs();}
+                                );
+
+        Coord Diff = gWorld[0]->Pos_ - bot_.Pos_;
+        value_[0] = Diff.x;
+        value_[1] = Diff.y;
+    } else
+    {
+        value_[0] = value_[1] = 0;
+    }
+
+    nVal = nVal_;
     Value = value_;
 
 }

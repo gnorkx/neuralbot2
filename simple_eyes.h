@@ -13,14 +13,14 @@ class simple_eyes : public sensor
     public:
 
 
-    void update(bot&,int&,float*);
-
+    void update(const bot&,int&,float*&);
         simple_eyes();
         ~simple_eyes();
     protected:
     private:
     int nVal_;
     float *value_;
+    static simple_eyes *instance_;
 };
 
 #endif // SIMPLE_EYES_H

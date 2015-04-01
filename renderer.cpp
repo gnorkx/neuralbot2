@@ -1,5 +1,8 @@
 #include "renderer.h"
 
+
+renderer* renderer::instance_ = nullptr;
+
 renderer::renderer(): scale_(1.), shift_({0,0}), resolution_({0,0})
 {
     //ctor
@@ -7,11 +10,11 @@ renderer::renderer(): scale_(1.), shift_({0,0}), resolution_({0,0})
 
 }
 
-void renderer::Init(iTuple &resolution, string &name, int scr_bpp)
+void renderer::Init(iTuple resolution, char *name, int scr_bpp)
 {
     resolution_ = resolution;
     screen_ = SDL_SetVideoMode( resolution_.x, resolution_.y, scr_bpp, SDL_SWSURFACE );
-    SDL_WM_SetCaption( name.c_str(), NULL );
+    SDL_WM_SetCaption( name , NULL );
 }
 
 
@@ -39,19 +42,24 @@ void renderer::ClearScreen()
   DrawRect(tmp, resolution_, {0,0,0});
 }
 
-void renderer::Rect(fTuple Pos, fTuple Size, color c)
+void renderer::Flip()
+{
+    SDL_Flip( screen_ );
+}
+
+void renderer::Rect(Coord Pos, Coord Size, color c)
 {
     DrawRect(Pos2Pix(Pos),Size2Pix(Size), c);
 }
-void renderer::Square(fTuple Pos, float l, color c)
+void renderer::Square(Coord Pos, float l, color c)
 {
     Rect(Pos,{l,l},c);
 }
-void renderer::Circle(fTuple Pos, float Radius, color c)
+void renderer::Circle(Coord Pos, float Radius, color c)
 {
     DrawCircle(Pos2Pix(Pos),Size2Pix(Radius), c);
 }
-void renderer::Line(fTuple Start, fTuple End, color c)
+void renderer::Line(Coord Start, Coord End, color c)
 {
     DrawLine(Pos2Pix(Start),Pos2Pix(End), c);
 }
@@ -84,7 +92,7 @@ Uint32 renderer::GetPixel(SDL_Surface* s, iTuple Pos)
     return pix[Pos.x + Pos.y*s->w];
 }
 
-iTuple renderer::Pos2Pix(fTuple Pos)
+iTuple renderer::Pos2Pix(Coord Pos)
 {
     Pos.x -= shift_.x;
     Pos.y -= shift_.y;
@@ -96,7 +104,7 @@ int renderer::Size2Pix(float l)
     return scale_*l + 0.5;
 }
 
-iTuple renderer::Size2Pix(fTuple l)
+iTuple renderer::Size2Pix(Coord l)
 {
     return iTuple(Size2Pix(l.x),Size2Pix(l.y));
 }
