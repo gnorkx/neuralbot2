@@ -1,8 +1,6 @@
 #include "renderer.h"
 
 
-renderer* renderer::instance_ = nullptr;
-
 renderer::renderer(): scale_(1.), shift_({0,0}), resolution_({0,0})
 {
     //ctor
@@ -16,8 +14,8 @@ void renderer::Init(iTuple resolution, char *name, int scr_bpp)
     screen_ = SDL_SetVideoMode( resolution_.x, resolution_.y, scr_bpp, SDL_SWSURFACE );
     SDL_WM_SetCaption( name , NULL );
     scale_ = 7;
-    shift_.x = -resolution_.x/2.;
-    shift_.y = -resolution_.y/2.;
+    shift_.x = -resolution_.x/2;
+    shift_.y = -resolution_.y/2;
 }
 
 
@@ -27,16 +25,14 @@ renderer::~renderer()
 
 
     SDL_FreeSurface(screen_);
-    delete instance_;
 }
 
 
 
 renderer* renderer::Instance()
 {
-    if(!instance_)
-        instance_ = new renderer();
-    return instance_;
+    static renderer instance_;
+    return &instance_;
 }
 
 void renderer::ClearScreen()

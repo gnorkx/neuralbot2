@@ -18,7 +18,6 @@ class renderer
 
         SDL_Surface *screen_;
 
-        static renderer *instance_;
 
         ~renderer();
 
