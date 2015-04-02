@@ -22,9 +22,7 @@ void renderer::Init(iTuple resolution, char *name, int scr_bpp)
 
 renderer::~renderer()
 {
-
-
-    SDL_FreeSurface(screen_);
+   // SDL_FreeSurface(screen_);
 }
 
 
