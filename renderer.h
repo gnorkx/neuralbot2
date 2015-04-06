@@ -26,6 +26,7 @@ class renderer
 
         void ClearScreen();
         void Flip();
+        void Quit();
         void Rect(Coord, Coord, color);
         void Square(Coord, float, color);
         void Circle(Coord, float, color);

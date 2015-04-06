@@ -22,7 +22,6 @@ void renderer::Init(iTuple resolution, char *name, int scr_bpp)
 
 renderer::~renderer()
 {
-   // SDL_FreeSurface(screen_);
 }
 
 
@@ -42,6 +41,11 @@ void renderer::ClearScreen()
 void renderer::Flip()
 {
     SDL_Flip( screen_ );
+}
+
+void renderer::Quit()
+{
+    SDL_FreeSurface(screen_);
 }
 
 void renderer::Rect(Coord Pos, Coord Size, color c)
