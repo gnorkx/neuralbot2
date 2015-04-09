@@ -15,6 +15,20 @@ bot::bot(const bot &rhs)
     copy_nn(rhs);
 
     sensors_ = rhs.sensors_; //need to clone sensor objects..s.?
+
+    nn_train_in = new fann_type*[g_max_nn_train];
+    nn_train_out = new fann_type*[g_max_nn_train];
+    for(int i = 0; i<g_max_nn_train; i++)
+    {
+        nn_train_in[i] = new fann_type[g_max_nn_in];
+        nn_train_out[i] = new fann_type[g_max_nn_out];
+        for(int j= 0; j<g_max_nn_in; j++)
+            nn_train_in[i][j] = rhs.nn_train_in[i][j];
+        for(int j = 0; j<g_max_nn_out; j++)
+            nn_train_out[i][j] = rhs.nn_train_out[i][j];
+    }
+
+
 }
 
 bot::bot(bot &&rhs)
@@ -25,6 +39,11 @@ bot::bot(bot &&rhs)
     rhs.nnet_ = nullptr;
 
     sensors_.swap(rhs.sensors_);
+
+    nn_train_in = rhs.nn_train_in;
+    nn_train_out = rhs.nn_train_out;
+    rhs.nn_train_in = nullptr;
+    rhs.nn_train_out = nullptr;
 
 }
 
@@ -57,6 +76,22 @@ bot::~bot()
 
 delete nnet_;
 
+if(nn_train_in && nn_train_out)
+    {
+        for(int i = 0; i<g_max_nn_train; i++)
+        {
+            delete[] nn_train_in[i];
+            delete[] nn_train_out[i];
+            nn_train_in[i] = nullptr;
+            nn_train_out[i] = nullptr;
+        }
+        delete[] nn_train_in;
+        delete[] nn_train_out;
+
+        nn_train_in = nullptr;
+        nn_train_out = nullptr;
+    }
+
 }
 
 
@@ -88,10 +123,60 @@ void bot::update()
 
     Lifetime_++;
 
+    object* TouchedFood = touch();
+    if(TouchedFood)
+    {
+        eat(TouchedFood);
+        learn();
+    }
+
     renderer::Instance()->Circle(Pos_, size_, c_);
     renderer::Instance()->Line(Pos_,Pos_+DistClosest,c_);
     cout<<Pos_<<endl;
 }
+
+object* bot::touch()
+{
+   if(gWorld.size()>0)
+    {
+        std::partial_sort(gWorld.begin(),
+            gWorld.begin()+1,
+            gWorld.end(),
+            [=]( object *a,  object *b){ float Diff_a = a->active_?(a->Pos_-bot_.Pos_).abs():9999.;
+                                 float Diff_b = b->active?(b->Pos_ - bot_.Pos_).abs():9999;
+                                return Diff_a<Diff_b;}
+                                );
+
+
+        Coord Diff = gWorld[0]->Pos_ - bot_.Pos_;
+        if(Diff.abs()<bot.size_+gWorld[0]->size_ && gWorld[0]->active_)
+            return gWorld[0];
+    }
+
+    return nullptr;
+}
+
+void bot::eat(object* food)
+{
+    if(!food) return;
+    Life_ += food->life_;
+    food->SetInactive();
+}
+
+void bot::learn()
+{
+    unsigned TrainSteps = std::min((unsigned) g_max_nn_train,Lifetime);
+    if(TrainSteps > 0)
+    {
+        FANN::training_data tmp_tr;
+        tmp_tr.set_train_data(TrainSteps,g_max_nn_in,nn_train_in,g_max_nn_out,nn_train_out);
+        if(tr.length_train_data()>0)
+            tr.merge_train_data(tmp_tr);
+        else
+            tr.set_train_data(TrainSteps,g_max_nn_in,nn_train_in,g_max_nn_out,nn_train_out);
+    }
+}
+
 
 void bot::init()
 {
@@ -109,6 +194,18 @@ void bot::init()
     nnet_->create_standard_array(2,neurons);
     nnet_->set_activation_function_output(FANN::SIGMOID_SYMMETRIC);
     nnet_->set_activation_function_hidden(FANN::SIGMOID_SYMMETRIC);
+
+    nn_train_in = new fann_type*[g_max_nn_train];
+        nn_train_out = new fann_type*[g_max_nn_train];
+        for(int i = 0; i<g_max_nn_train; i++)
+        {
+            nn_train_in[i] = new fann_type[g_max_nn_in];
+            nn_train_out[i] = new fann_type[g_max_nn_out];
+            for(int j= 0; j<g_max_nn_in; j++)
+                nn_train_in[i][j] = 0;
+            for(int j = 0; j<g_max_nn_out; j++)
+                nn_train_out[i][j] = 0;
+        }
 
 }
 

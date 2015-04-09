@@ -7,6 +7,8 @@ food::food(Coord Pos, float Life)
     size_ = 1;
     if(life_>0) c_={255,0,0};
     else        c_={255,0,255};
+
+    active_=1;
 }
 
 food::~food()
@@ -16,5 +18,16 @@ food::~food()
 
 void food::update()
 {
-    renderer::Instance()->Circle(Pos_,size_, c_);
+    if(active_)
+        renderer::Instance()->Circle(Pos_,size_, c_);
+    else
+        {
+            active_=inactiveCounter_++/500;
+        }
+}
+
+void food::SetInactive()
+{
+    active_=0;
+    inactiveCounter_=0;
 }

@@ -47,6 +47,10 @@ class bot: public object
     void copy_bot(const bot&); //copy non-dynamic members
     void copy_nn(const bot&);
 
+    object* touch();
+    void eat(object*);
+    void learn();
+
 };
 
 
