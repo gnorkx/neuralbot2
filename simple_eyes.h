@@ -11,14 +11,15 @@ extern vector<object*>gWorld;
 class simple_eyes : public sensor
 {
     public:
-
+    int nVal_;
 
     void update(const bot&,int&,float*&);
         simple_eyes();
         ~simple_eyes();
+
     protected:
     private:
-    int nVal_;
+
     float *value_;
     static simple_eyes *instance_;
 };

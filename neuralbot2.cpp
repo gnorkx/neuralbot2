@@ -46,7 +46,6 @@ void Frame( void )
 {
 
     renderer::Instance()->ClearScreen();
-    cout<<"test"<<endl;
     for(auto it = gBots.begin(); it!=gBots.end(); ++it)
     {
         (*it)->update();
@@ -121,6 +120,7 @@ int main()
 
 
 	}
+	renderer::Instance()->Quit();
     SDL_Quit();
     return 1;
 }
