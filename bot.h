@@ -21,11 +21,12 @@ class bot: public object
     float Life_;
     float MaxLife_;
 
-    int Lifetime_;
+    unsigned Lifetime_;
 
 
+    unsigned nSensorOut_;
     vector<sensor*> sensors_;
-
+    neural_net *nnet_;
 
 
 
@@ -35,13 +36,16 @@ class bot: public object
 
 
     bot(Coord);
-//    bot(const bot&);
-//    bot( bot&& );
+    bot(const bot&);
+    bot( bot&& );
 //
 //    bot* operator=(const bot&);
 //    bot* operator=(bot&&);
 
     ~bot();
+    private:
+    void copy_bot(const bot&); //copy non-dynamic members
+    void copy_nn(const bot&);
 
 };
 
