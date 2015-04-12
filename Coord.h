@@ -30,6 +30,7 @@ class Coord{
     float CosTheta( Coord v ){return (x*v.x + y*v.y)/(x*x + y*y)/(v.x*v.x+v.y*v.y);};
     float Theta( Coord v ){return acos(CosTheta(v))/M_PI*180.;};
     Coord unit(){return Coord(x/abs(),y/abs());};
+    void rotate(float);
 
 };
 

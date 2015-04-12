@@ -58,6 +58,15 @@ Coord operator* (const float& a , const Coord& rhs)
 };
 
 
+void rotate(float alpha)
+{
+    alpha = alpha/180.*M_PI;
+    float x1 = cos(alpha)*x + sin(alpha)*y;
+    float y1 = cos(alpha)*y - sin(alpha)*x;
+    x= x1; y= y1;
+
+}
+
 
 #endif
 
