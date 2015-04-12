@@ -16,16 +16,16 @@ bot::bot(const bot &rhs)
 
     sensors_ = rhs.sensors_; //need to clone sensor objects..s.?
 
-    nn_train_in = new fann_type*[g_max_nn_train];
-    nn_train_out = new fann_type*[g_max_nn_train];
-    for(int i = 0; i<g_max_nn_train; i++)
+    nnet_TrainIn_ = new fann_type*[nnet_TrainSteps_];
+    nnet_TrainOut_ = new fann_type*[nnet_TrainSteps_];
+    for(int i = 0; i<nnet_TrainSteps_; i++)
     {
-        nn_train_in[i] = new fann_type[g_max_nn_in];
-        nn_train_out[i] = new fann_type[g_max_nn_out];
-        for(int j= 0; j<g_max_nn_in; j++)
-            nn_train_in[i][j] = rhs.nn_train_in[i][j];
-        for(int j = 0; j<g_max_nn_out; j++)
-            nn_train_out[i][j] = rhs.nn_train_out[i][j];
+        nnet_TrainIn_[i] = new fann_type[nnet_nInputs_];
+        nnet_TrainOut_[i] = new fann_type[nnet_nOutputs_];
+        for(int j= 0; j<nnet_nInputs_; j++)
+            nnet_TrainIn_[i][j] = rhs.nnet_TrainIn_[i][j];
+        for(int j = 0; j<nnet_nOutputs_; j++)
+            nnet_TrainOut_[i][j] = rhs.nnet_TrainOut_[i][j];
     }
 
 
@@ -40,10 +40,10 @@ bot::bot(bot &&rhs)
 
     sensors_.swap(rhs.sensors_);
 
-    nn_train_in = rhs.nn_train_in;
-    nn_train_out = rhs.nn_train_out;
-    rhs.nn_train_in = nullptr;
-    rhs.nn_train_out = nullptr;
+    nnet_TrainIn_ = rhs.nnet_TrainIn_;
+    nnet_TrainOut_ = rhs.nnet_TrainOut_;
+    rhs.nnet_TrainIn_ = nullptr;
+    rhs.nnet_TrainOut_ = nullptr;
 
 }
 
@@ -76,20 +76,20 @@ bot::~bot()
 
 delete nnet_;
 
-if(nn_train_in && nn_train_out)
+if(nnet_TrainIn_ && nnet_TrainOut_)
     {
-        for(int i = 0; i<g_max_nn_train; i++)
+        for(int i = 0; i<nnet_TrainSteps_; i++)
         {
-            delete[] nn_train_in[i];
-            delete[] nn_train_out[i];
-            nn_train_in[i] = nullptr;
-            nn_train_out[i] = nullptr;
+            delete[] nnet_TrainIn_[i];
+            delete[] nnet_TrainOut_[i];
+            nnet_TrainIn_[i] = nullptr;
+            nnet_TrainOut_[i] = nullptr;
         }
-        delete[] nn_train_in;
-        delete[] nn_train_out;
+        delete[] nnet_TrainIn_;
+        delete[] nnet_TrainOut_;
 
-        nn_train_in = nullptr;
-        nn_train_out = nullptr;
+        nnet_TrainIn_ = nullptr;
+        nnet_TrainOut_ = nullptr;
     }
 
 }
@@ -123,10 +123,29 @@ void bot::update()
 
     Lifetime_++;
 
+
+    //move this part into new class
+    for(int i = std::min((unsigned)nnet_nInputs_,Lifetime_)-1; i>0; i--)
+    {
+        for(int j = 0; j<nnet_nInputs_; j++)
+            nnet_TrainIn_[i][j] = nnet_TrainIn_[i-1][j];
+        for(int j = 0; j<nnet_nOutputs_; j++)
+            nnet_TrainOut_[i][j] = nnet_TrainOut_[i-1][j];
+    }
+
+    for(int j =0; j<nnet_nInputs_; j++)
+        nnet_TrainIn_[0][j] = nnet_input[j];
+
+    for(int j =0; j<nnet_nOutputs_; j++)
+        nnet_TrainOut_[0][j] = nnet_out[j];
+
+
+
+
     object* TouchedFood = touch();
     if(TouchedFood)
     {
-        eat(TouchedFood);
+        eat((food*)TouchedFood);
         learn();
     }
 
@@ -137,43 +156,45 @@ void bot::update()
 
 object* bot::touch()
 {
+    //move this into sensor
    if(gWorld.size()>0)
     {
         std::partial_sort(gWorld.begin(),
             gWorld.begin()+1,
             gWorld.end(),
-            [=]( object *a,  object *b){ float Diff_a = a->active_?(a->Pos_-bot_.Pos_).abs():9999.;
-                                 float Diff_b = b->active?(b->Pos_ - bot_.Pos_).abs():9999;
+            [=]( object *a,  object *b){ float Diff_a = a->active_?(a->Pos_- Pos_).abs():9999.;
+                                 float Diff_b = b->active_?(b->Pos_ - Pos_).abs():9999;
                                 return Diff_a<Diff_b;}
                                 );
 
 
-        Coord Diff = gWorld[0]->Pos_ - bot_.Pos_;
-        if(Diff.abs()<bot.size_+gWorld[0]->size_ && gWorld[0]->active_)
+        Coord Diff = gWorld[0]->Pos_ - Pos_;
+        if(Diff.abs()<size_+gWorld[0]->size_ && gWorld[0]->active_)
             return gWorld[0];
     }
 
     return nullptr;
 }
 
-void bot::eat(object* food)
+void bot::eat(food* food)
 {
     if(!food) return;
+
     Life_ += food->life_;
     food->SetInactive();
 }
 
 void bot::learn()
 {
-    unsigned TrainSteps = std::min((unsigned) g_max_nn_train,Lifetime);
+    unsigned TrainSteps = std::min((unsigned) nnet_TrainSteps_,Lifetime_);
     if(TrainSteps > 0)
     {
         FANN::training_data tmp_tr;
-        tmp_tr.set_train_data(TrainSteps,g_max_nn_in,nn_train_in,g_max_nn_out,nn_train_out);
-        if(tr.length_train_data()>0)
-            tr.merge_train_data(tmp_tr);
-        else
-            tr.set_train_data(TrainSteps,g_max_nn_in,nn_train_in,g_max_nn_out,nn_train_out);
+        tmp_tr.set_train_data(TrainSteps,nnet_nInputs_,nnet_TrainIn_,nnet_nOutputs_,nnet_TrainOut_);
+//        if(tr.length_train_data()>0)
+//            tr.merge_train_data(tmp_tr);
+//        else
+        tmp_tr.set_train_data(TrainSteps,nnet_nInputs_,nnet_TrainIn_,nnet_nOutputs_,nnet_TrainOut_);
     }
 }
 
@@ -187,25 +208,27 @@ void bot::init()
 
     nSensorOut_ = 0;
     for(auto it = sensors_.begin(); it!= sensors_.end(); ++it)
-        nSensorOut_ += sensors_->nVal_;
+        nSensorOut_ += (*it)->nVal_;
 
     nnet_= new neural_net;
-    const unsigned neurons[] = {nSensorOut_,2};
+    const unsigned neurons[] = {nSensorOut_,nnet_nOutputs_};
     nnet_->create_standard_array(2,neurons);
     nnet_->set_activation_function_output(FANN::SIGMOID_SYMMETRIC);
     nnet_->set_activation_function_hidden(FANN::SIGMOID_SYMMETRIC);
 
-    nn_train_in = new fann_type*[g_max_nn_train];
-        nn_train_out = new fann_type*[g_max_nn_train];
-        for(int i = 0; i<g_max_nn_train; i++)
-        {
-            nn_train_in[i] = new fann_type[g_max_nn_in];
-            nn_train_out[i] = new fann_type[g_max_nn_out];
-            for(int j= 0; j<g_max_nn_in; j++)
-                nn_train_in[i][j] = 0;
-            for(int j = 0; j<g_max_nn_out; j++)
-                nn_train_out[i][j] = 0;
-        }
+
+
+    nnet_TrainIn_ = new fann_type*[nnet_TrainSteps_];
+    nnet_TrainOut_ = new fann_type*[nnet_TrainSteps_];
+    for(int i = 0; i<nnet_TrainSteps_; i++)
+    {
+        nnet_TrainIn_[i] = new fann_type[nnet_nInputs_];
+        nnet_TrainOut_[i] = new fann_type[nnet_nOutputs_];
+        for(int j= 0; j<nnet_nInputs_; j++)
+            nnet_TrainIn_[i][j] = 0;
+        for(int j = 0; j<nnet_nOutputs_; j++)
+            nnet_TrainOut_[i][j] = 0;
+    }
 
 }
 

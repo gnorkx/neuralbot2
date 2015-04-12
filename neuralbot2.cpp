@@ -34,9 +34,11 @@ vector<bot*> gBots;
 void WorldInit()
 {
 
-    gWorld.push_back(new food({1,1},1.));
+    for(int i = 0; i< 10;i++)
+    gWorld.push_back(new food({rnd0(100),rnd0(100)},1.));
 
-    gBots.push_back(new bot({1,0}));
+    for(int i = 0; i< 3;i++)
+    gBots.push_back(new bot({rnd0(10),rnd0(10)}));
 
 
 }

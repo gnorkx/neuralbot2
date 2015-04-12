@@ -9,6 +9,8 @@
 #include"doublefann.h"
 #include"fann_cpp.h"
 
+#include"food.h"
+
 using namespace FANN;
 using namespace std;
 
@@ -48,9 +50,16 @@ class bot: public object
     void copy_nn(const bot&);
 
     object* touch();
-    void eat(object*);
+    void eat(food*);
     void learn();
 
+    fann_type **nn_train_in;
+    fann_type **nn_train_out;
+
+
+    const static unsigned g_max_nn_train = 20;
+    const static unsigned g_max_nn_in = 2;
+    const static unsigned g_max_nn_out = 2;
 };
 
 
