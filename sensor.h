@@ -10,6 +10,8 @@ class sensor
     virtual void update(const bot&, int&, float*&) =0;
     virtual ~sensor(){};
 
+    int nVal_;
+
 
 };
 

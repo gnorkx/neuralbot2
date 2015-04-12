@@ -14,6 +14,8 @@ class object
     float size_;
     color c_;
 
+    int active_;
+
     virtual void update() = 0;
     virtual ~object(){};
 };

@@ -33,18 +33,20 @@ void simple_eyes::update(const bot &bot_, int &nVal, float *&Value)
         std::partial_sort(gWorld.begin(),
             gWorld.begin()+1,
             gWorld.end(),
-            [=]( object *a,  object *b){ Coord Diff_a = a->Pos_ - bot_.Pos_;
-                                 Coord Diff_b = b->Pos_ - bot_.Pos_;
-                                return Diff_a.abs()<Diff_b.abs();}
+            [=]( object *a,  object *b){ float Diff_a = a->active_?(a->Pos_- bot_.Pos_).abs():1.e20;
+                                 float Diff_b = b->active_?(b->Pos_ - bot_.Pos_).abs():1.e20;
+                                return Diff_a<Diff_b;}
                                 );
 
-        Coord Diff = gWorld[0]->Pos_ - bot_.Pos_;
-        value_[0] = Diff.x;
-        value_[1] = Diff.y;
-    } else
-    {
+        if(gWorld[0]->active_)
+        {
+            Coord Diff = gWorld[0]->Pos_ - bot_.Pos_;
+            value_[0] = Diff.x;
+            value_[1] = Diff.y;
+        } else
+            value_[0] = value_[1] = 0;
+    }  else
         value_[0] = value_[1] = 0;
-    }
 
     nVal = nVal_;
     Value = value_;

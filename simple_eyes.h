@@ -11,7 +11,6 @@ extern vector<object*>gWorld;
 class simple_eyes : public sensor
 {
     public:
-    int nVal_;
 
     void update(const bot&,int&,float*&);
         simple_eyes();
