@@ -64,9 +64,8 @@ void Coord::rotate(float alpha)
 
 }
 
-void Coord::perp()
+Coord Coord::perp() const
 {
-    float tmp = x;
-    x=y; y=-tmp;
+    return Coord(y,-x);
 }
 

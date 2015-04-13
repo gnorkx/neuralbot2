@@ -25,12 +25,13 @@ class Coord{
 
     void scale(float a){x*=a; y*=a;};
     void swap(Coord&);
-    float abs(){return sqrt(x*x + y*y);};
-    float absqr(){return x*x + y*y;};
-    float CosTheta( Coord v ){return (x*v.x + y*v.y)/(x*x + y*y)/(v.x*v.x+v.y*v.y);};
-    float Theta( Coord v ){return acos(CosTheta(v))/M_PI*180.;};
-    Coord unit(){return Coord(x/abs(),y/abs());};
+    float abs() const {return sqrt(x*x + y*y);} ;
+    float absqr() const {return x*x + y*y;} ;
+    float CosTheta( const Coord v ) const {return (x*v.x + y*v.y)/(x*x + y*y)/(v.x*v.x+v.y*v.y);};
+    float Theta( const Coord v ) const {return acos(CosTheta(v))/M_PI*180.;};
+    Coord unit() const {return Coord(x/abs(),y/abs());} ;
     void rotate(float);
+    Coord perp() const;
 
 };
 
