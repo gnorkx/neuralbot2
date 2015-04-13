@@ -4,7 +4,7 @@
 
 #include<iostream>
 #include<cmath>
-
+#include<cstdio>
 
 
 class Coord{

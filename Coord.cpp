@@ -1,8 +1,5 @@
 
-#ifndef COORD_CPP
-#define COORD_CPP
 
-#include<cstdio>
 #include"Coord.h"
 Coord Coord::operator +(const Coord& rhs)
 {
@@ -58,7 +55,7 @@ Coord operator* (const float& a , const Coord& rhs)
 };
 
 
-void rotate(float alpha)
+void Coord::rotate(float alpha)
 {
     alpha = alpha/180.*M_PI;
     float x1 = cos(alpha)*x + sin(alpha)*y;
@@ -67,6 +64,9 @@ void rotate(float alpha)
 
 }
 
-
-#endif
+void Coord::perp()
+{
+    float tmp = x;
+    x=y; y=-tmp;
+}
 
