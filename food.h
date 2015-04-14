@@ -8,7 +8,6 @@ class food: public object
 {
     public:
         float life_;
-        int active_;
 
 
 
