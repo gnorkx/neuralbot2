@@ -16,11 +16,11 @@ class Coord{
     Coord(float a, float b): x(a), y(b) {};
     ~Coord(){};
 
-    Coord operator + (const Coord&);
-    Coord operator - (const Coord&);
+    Coord operator + (const Coord&) const;
+    Coord operator - (const Coord&) const;
     Coord& operator += (const Coord&);
     Coord& operator -= (const Coord&);
-    float operator* (const Coord&);
+    float operator* (const Coord&) const;
     friend std::ostream& operator << (std::ostream&, const Coord&);
 
     void scale(float a){x*=a; y*=a;};
@@ -29,7 +29,7 @@ class Coord{
     float absqr() const {return x*x + y*y;} ;
     float CosTheta( const Coord &v ) const {return (x*v.x + y*v.y)/sqrt(absqr()*v.absqr());};
     float SinTheta( const Coord &v ) const {return cross(v)/sqrt(absqr()*v.absqr());};
-    float Theta( const Coord &v ) const {return acos(CosTheta(v))/M_PI*180.;};
+    float Theta( const Coord &v ) const {return acos(CosTheta(v));};
     Coord unit() const {return Coord(x/abs(),y/abs());} ;
     float cross(const Coord &v) const {return x*v.y-y*v.x;}; // "3rd component"
     void rotate(float);

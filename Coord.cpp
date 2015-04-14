@@ -1,12 +1,12 @@
 
 
 #include"Coord.h"
-Coord Coord::operator +(const Coord& rhs)
+Coord Coord::operator +(const Coord& rhs) const
 {
   return Coord(x+rhs.x, y+rhs.y);
 }
 
-Coord Coord::operator -(const Coord& rhs)
+Coord Coord::operator -(const Coord& rhs) const
 {
   return Coord(x-rhs.x, y-rhs.y);
 }
@@ -23,9 +23,9 @@ Coord& Coord::operator -=(const Coord& rhs)
   y -= rhs.y;
   return *this;
 }
-float Coord::operator* (const Coord& rhs)
+float Coord::operator* (const Coord& rhs) const
 {
-   return Coord(x+rhs.x, y+rhs.y).abs();
+   return x*rhs.x + y*rhs.y;
 }
 
 void Coord::swap(Coord& c2)
@@ -57,7 +57,6 @@ Coord operator* (const float& a , const Coord& rhs)
 
 void Coord::rotate(float alpha)
 {
-    alpha = alpha/180.*M_PI;
     float x1 = cos(alpha)*x + sin(alpha)*y;
     float y1 = cos(alpha)*y - sin(alpha)*x;
     x= x1; y= y1;
@@ -72,7 +71,7 @@ Coord Coord::perp() const
 bool Coord::sameDirection(const Coord &v) const
 {
     Coord Diff = v - *this;
-    Coord vLarge = v.absqr()>*this.absqr()?v:*this;
+    Coord vLarge = v.absqr()>this->absqr()?v:*this;
 
     if( fabs(Diff*vLarge)/vLarge.abs() < vLarge.abs() )
         return true;
@@ -83,4 +82,16 @@ bool Coord::sameDirection(const Coord &v) const
 
 float Coord::ThetaMath(const Coord &v) const
 {
+    float phi =asin(cross(v)/sqrt(absqr()*v.absqr()));
+
+    if(sameDirection(v))
+    {
+        if(phi>0)
+            return phi;
+        else
+            return 2*M_PI + phi;
+    }
+    else
+        return M_PI - phi;
+
 }
