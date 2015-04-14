@@ -69,3 +69,18 @@ Coord Coord::perp() const
     return Coord(y,-x);
 }
 
+bool Coord::sameDirection(const Coord &v) const
+{
+    Coord Diff = v - *this;
+    Coord vLarge = v.absqr()>*this.absqr()?v:*this;
+
+    if( fabs(Diff*vLarge)/vLarge.abs() < vLarge.abs() )
+        return true;
+    else
+        return false;
+}
+
+
+float Coord::ThetaMath(const Coord &v) const
+{
+}
