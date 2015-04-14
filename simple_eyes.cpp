@@ -44,7 +44,7 @@ void simple_eyes::update(const bot &bot_, int &nVal, float *&Value)
             value_[0] = Diff.x;
             value_[1] = Diff.y;
         } else
-            value_[0] = value_[1] = 0;
+            value_[0] = value_[1] = 99999.;
     }  else
         value_[0] = value_[1] = 0;
 
