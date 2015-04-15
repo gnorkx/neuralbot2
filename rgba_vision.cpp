@@ -20,7 +20,7 @@ void rgba_vision::update(const bot &bot_, int &nVal, float *&Value)
 {
 
     int nPixel_ = 99;
-    float openingAngle_ = 45.;
+    float openingAngle_ = M_PI*0.25;
 
     color cArray_[nPixel_];
     for(int i = 0; i < nPixel_; i++)
@@ -40,25 +40,42 @@ void rgba_vision::update(const bot &bot_, int &nVal, float *&Value)
         Coord DiffPerpUnit = (Diff.perp()).unit();
         Coord DiffA = Diff + (*it)->size_*DiffPerpUnit;
         Coord DiffB = Diff - (*it)->size_*DiffPerpUnit;
-        cout<<Diff<<" -- "<<DiffA<<" -- "<<DiffB<<endl;
 
-        float alphaA = acos(bot_.Direction_.SinTheta(DiffA))/M_PI*180. -90;
-        float alphaB = acos(bot_.Direction_.SinTheta(DiffB))/M_PI*180. -90;
-        cout<<alphaA<<" "<<alphaB<<endl;
-        int iDiffA = alphaA/openingAngle_*nPixel_/2-nPixel_/2;
-        int iDiffB = alphaB/openingAngle_*nPixel_/2-nPixel_/2;
+        float alphaA = bot_.Direction_.ThetaMath(DiffA);
+        float alphaB = bot_.Direction_.ThetaMath(DiffB);
 
-        cout<<iDiffA<<" "<<iDiffB<<endl;
 
-        bool fl_print = false;
-        for(int i = 0; i < nPixel_; i++)
+        Coord RightFOV = bot_.Direction_; RightFOV.rotate(-openingAngle_);
+
+        float betaA = DiffA.ThetaMath(RightFOV);
+        float betaB = DiffB.ThetaMath(RightFOV);
+        cout<<betaA<<" "<<betaB<<endl;
+
+        int iPosA = betaA/(2*openingAngle_)*nPixel_;
+        int iPosB = betaB/(2.*openingAngle_)*nPixel_;
+
+        if(iPosA>nPixel_)
         {
-            if(i == iDiffA || i==iDiffB)
-                fl_print = !fl_print;
+            if(iPosB > nPixel_)
+            {
+                if(iPosA>iPosB) continue;
+                iPosA = nPixel_-1;
+                iPosB = 0;
+            }
+            iPosA = nPixel_-1;
+        } else
+        {
+            if(iPosB > nPixel_)
+            {
+                if(iPosA>iPosB) continue;
+                iPosB = 0;
+            }
+        }
+        cout<<iPosA<< " " <<iPosB<<endl;
 
-            if(fl_print)
+        for(int i = iPosB; i < iPosA; i++)
+        {
                 cArray_[i] = (*it)->c_;
-
         }
     }
 
