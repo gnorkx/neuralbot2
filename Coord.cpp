@@ -73,7 +73,7 @@ bool Coord::sameDirection(const Coord &v) const
     Coord Diff = v - *this;
     Coord vLarge = v.absqr()>this->absqr()?v:*this;
 
-    if( fabs(Diff*vLarge)/vLarge.abs() < vLarge.abs() )
+    if( fabs(Diff*vLarge)/vLarge.absqr() < 1. ) //divided by |v|
         return true;
     else
         return false;
