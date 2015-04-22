@@ -1,7 +1,9 @@
 #include "bot.h"
+#include "rgba_vision.h"
 #include "simple_eyes.h"
 
 extern vector<object*> gWorld;
+extern vector<bot*> gNewBots;
 
 bot::bot(Coord Pos)
 {
@@ -14,8 +16,8 @@ bot::bot(const bot &rhs)
     copy_bot(rhs);
     copy_nn(rhs);
 
-    sensors_ = rhs.sensors_; //need to clone sensor objects..s.?
-
+ //   sensors_ = rhs.sensors_; //need to clone sensor objects..s.?
+    sensors_.push_back(new rgba_vision);
     nnet_TrainIn_ = new fann_type*[nnet_TrainSteps_];
     nnet_TrainOut_ = new fann_type*[nnet_TrainSteps_];
     for(int i = 0; i<nnet_TrainSteps_; i++)
@@ -53,11 +55,17 @@ void bot::copy_bot(const bot &rhs)
     Direction_  = rhs.Direction_;
     Vel_        = rhs.Vel_;
     c_          = rhs.c_;
+    size_       = rhs.size_;
+    active_     = rhs.active_;
 
     Life_       = rhs.Life_;
     MaxLife_    = rhs.MaxLife_;
 
     Lifetime_   = rhs.Lifetime_;
+
+    nSensorOut_ = rhs.nSensorOut_;
+
+    nnet_nInputs_ = rhs.nnet_nInputs_;
 
 }
 
@@ -98,10 +106,10 @@ if(nnet_TrainIn_ && nnet_TrainOut_)
 void bot::update()
 {
 
-//    Vel_ = {rnd0(),rnd0()};
-//    Pos_ += Vel_;
+    if(!active_) return;
 
-    int nVal;
+
+    int nVal =0;
     float *Values = nullptr;
     fann_type nnet_input[nSensorOut_];
 
@@ -109,23 +117,25 @@ void bot::update()
     for(auto it = sensors_.begin(); it!= sensors_.end();++it)
     {
         (*it)->update(*this, nVal, Values);
-        DistClosest = {Values[0],Values[1]};
-        for(int i = 0; i<nVal; i++)
-        {
-            nnet_input[i] = Values[i];
-        }
-    }
 
+    }
+    DistClosest = {Values[0],Values[1]};
+    for(int i = 0; i<nVal; i++)
+    {
+        nnet_input[i] = Values[i];
+    }
     fann_type *nnet_out = nnet_->run(nnet_input);
 
-    Vel_ = {nnet_out[0], nnet_out[1]};
-    Pos_+=Vel_;
+    Vel_ = Coord(nnet_out[0], nnet_out[1]);
+    Direction_ = Coord(nnet_out[2], nnet_out[3]).unit();
+    Pos_+=2*Vel_;
+    //Direction_ = Vel_.unit();
+//    Direction_.rotate(0.005);
 
-    Lifetime_++;
 
 
     //move this part into new class
-    for(int i = std::min((unsigned)nnet_nInputs_,Lifetime_)-1; i>0; i--)
+    for(int i = std::min((unsigned)nnet_TrainSteps_,Lifetime_)-1; i>0; i--)
     {
         for(int j = 0; j<nnet_nInputs_; j++)
             nnet_TrainIn_[i][j] = nnet_TrainIn_[i-1][j];
@@ -140,6 +150,7 @@ void bot::update()
         nnet_TrainOut_[0][j] = nnet_out[j];
 
 
+    Lifetime_++;
 
 
     object* TouchedFood = touch();
@@ -147,11 +158,25 @@ void bot::update()
     {
         eat((food*)TouchedFood);
         learn();
+//        bot* b = newChild();
+//        delete b;
+        gNewBots.push_back(newChild());
     }
 
+    Life_ -= 0.002;
+    if(Life_<0) kill();
+
     renderer::Instance()->Circle(Pos_, size_, c_);
-    renderer::Instance()->Line(Pos_,Pos_+DistClosest,c_);
-    cout<<Pos_<<endl;
+
+    Coord FOVA = Direction_; FOVA.rotate(-0.25*M_PI);
+    Coord FOVB = Direction_; FOVB.rotate(0.25*M_PI);
+   // cout<<FOVA<<"//////"<<FOVB<<endl;
+    renderer::Instance()->Line(Pos_, 10*FOVA+Pos_,{255,255,0});
+    renderer::Instance()->Line(Pos_, 10*FOVB+Pos_,{255,255,0});
+//    renderer::Instance()->Line(Pos_, 10*(Pos_+Direction_-Direction_.perp()),{255,255,255});
+
+
+
 }
 
 object* bot::touch()
@@ -204,15 +229,19 @@ void bot::init()
 
     c_ = {255,255,0};
     size_ = 1;
-    sensors_.push_back(new simple_eyes);
+    Lifetime_ = 0;
+    Life_ = MaxLife_ =1.;
+    active_ = 1;
+    sensors_.push_back(new rgba_vision);
 
     nSensorOut_ = 0;
     for(auto it = sensors_.begin(); it!= sensors_.end(); ++it)
         nSensorOut_ += (*it)->nVal_;
 
+    nnet_nInputs_ = nSensorOut_;
     nnet_= new neural_net;
-    const unsigned neurons[] = {nSensorOut_,nnet_nOutputs_};
-    nnet_->create_standard_array(2,neurons);
+    const unsigned neurons[] = {nSensorOut_,nSensorOut_,nnet_nOutputs_};
+    nnet_->create_standard_array(3,neurons);
     nnet_->set_activation_function_output(FANN::SIGMOID_SYMMETRIC);
     nnet_->set_activation_function_hidden(FANN::SIGMOID_SYMMETRIC);
 
@@ -232,3 +261,39 @@ void bot::init()
 
 }
 
+void bot::kill()
+{
+    active_ = 0;
+    gWorld.push_back(new food(Pos_,0.5*MaxLife_));
+}
+
+void bot::mutate()
+{
+    MaxLife_ += MaxLife_*norm(0.05);
+    if(MaxLife_<0.3) MaxLife_ = 0.3;
+    if(Life_>MaxLife_) Life_ = MaxLife_;
+
+
+    connection* weights = new connection[nnet_->get_total_connections()];
+    nnet_->get_connection_array(weights);
+
+    for (unsigned i = 0; i< nnet_->get_total_connections();i++)
+    {
+        weights[i].weight=weights[i].weight*(1+norm(1.));
+    }
+    nnet_->set_weight_array(weights, nnet_->get_total_connections());
+
+    delete[] weights;
+
+}
+
+bot* bot::newChild()
+{
+    bot *newBot = new bot(*this);
+
+    newBot->Lifetime_ = 0;
+    newBot->Life_ = Life_*1.1;
+    newBot->mutate();
+
+    return newBot;
+}

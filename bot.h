@@ -34,7 +34,7 @@ class bot: public object
 
     void init();
     void update();
-    void mutate();
+
 
 
     bot(Coord);
@@ -45,21 +45,30 @@ class bot: public object
 //    bot* operator=(bot&&);
 
     ~bot();
+
+    protected:
+        void mutate();
+
     private:
-    void copy_bot(const bot&); //copy non-dynamic members
-    void copy_nn(const bot&);
+        void copy_bot(const bot&); //copy non-dynamic members
+        void copy_nn(const bot&);
 
-    object* touch();
-    void eat(food*);
-    void learn();
+        object* touch();
+        void eat(food*);
+        void learn();
 
-    fann_type **nn_train_in;
-    fann_type **nn_train_out;
+        fann_type **nnet_TrainIn_;
+        fann_type **nnet_TrainOut_;
 
 
-    const static unsigned g_max_nn_train = 20;
-    const static unsigned g_max_nn_in = 2;
-    const static unsigned g_max_nn_out = 2;
+        const static unsigned nnet_TrainSteps_ = 100;
+         unsigned nnet_nInputs_ = 2;
+        const static unsigned nnet_nOutputs_ = 4;
+        void clone();
+
+        void kill();
+        bot* newChild();
+
 };
 
 
