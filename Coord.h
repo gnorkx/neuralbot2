@@ -35,7 +35,10 @@ class Coord{
     void rotate(float);
     Coord perp() const;
     bool sameDirection(const Coord&) const;
-    float ThetaMath(const Coord &v) const;
+    float Theta180(const Coord &) const;
+    float Theta360(const Coord &) const;
+
+    void SetRPhi(float, float);
 
 };
 

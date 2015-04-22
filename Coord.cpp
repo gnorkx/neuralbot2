@@ -80,10 +80,13 @@ bool Coord::sameDirection(const Coord &v) const
 }
 
 
-float Coord::ThetaMath(const Coord &v) const
+float Coord::Theta360(const Coord &v) const
 {
-    float phi =asin(cross(v)/sqrt(absqr()*v.absqr()));
+    float phi =cross(v)/sqrt(absqr()*v.absqr());
+    if(phi>1.) phi = 1.;
+    else if(phi<-1.) phi = -1.;
 
+    phi = asin(phi);
     if(sameDirection(v))
     {
         if(phi>0)
@@ -94,4 +97,25 @@ float Coord::ThetaMath(const Coord &v) const
     else
         return M_PI - phi;
 
+}
+float Coord::Theta180(const Coord &v) const
+{
+    float phi =cross(v)/sqrt(absqr()*v.absqr());
+    if(phi>1.) phi = 1.;
+    else if(phi<-1.) phi = -1.;
+
+    phi = asin(phi);
+    if(sameDirection(v))
+    {
+        return fabs(phi);
+    }
+    else
+        return M_PI - fabs(phi);
+
+}
+
+void Coord::SetRPhi(float r, float phi)
+{
+    x= r*cos(phi);
+    y= r*sin(phi);
 }
