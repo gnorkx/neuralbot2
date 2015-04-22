@@ -19,6 +19,18 @@ class rgba_vision : public sensor
         void update(const bot&, int&, float*&);
     protected:
     private:
+    float openingAngle_;
+    float maxDistance_;
+    int nPixel_;
+
+    struct InFOV
+    {
+        InFOV(const bot* bot, const rgba_vision* caller ):bot_(bot), caller_(caller){};
+        bool operator()(const object*) const;
+        private:
+            const bot* bot_;
+            const rgba_vision* caller_;
+    };
 };
 
 #endif // RGBA_VISION_H
