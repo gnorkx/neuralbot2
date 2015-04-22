@@ -30,15 +30,21 @@ int fl_lines = false;
 
 vector<object*> gWorld;
 vector<bot*> gBots;
+vector<bot*> gNewBots;
 
 void WorldInit()
 {
 
-    for(int i = 0; i< 10;i++)
-    gWorld.push_back(new food({rnd0(100),rnd0(100)},1.));
+    for(int i = 0; i< 200;i++)
+        gWorld.push_back(new food({rnd0(150),rnd0(150)},1.));
+//    gWorld.push_back(new food({5,5},1.));
+//    gWorld.push_back(new food({20,-10},1.));
 
-    for(int i = 0; i< 3;i++)
-    gBots.push_back(new bot({rnd0(10),rnd0(10)}));
+    for(int i = 0; i< 20;i++)
+        gBots.push_back(new bot({rnd0(70),rnd0(70)}));
+    //gBots.push_back(new bot({10,-80}));
+   //gBots[0]->Direction_ = {1,1};
+ //   gBots[0]->Vel_ = {0,0.1};
 
 
 }
@@ -48,17 +54,24 @@ void Frame( void )
 {
 
     renderer::Instance()->ClearScreen();
-    for(auto it = gBots.begin(); it!=gBots.end(); ++it)
+    for(int i = 0; i<gBots.size(); ++i)
     {
-        (*it)->update();
+        gBots[i]->update();
     }
-        cout<<"test1"<<endl;
+    //    cout<<"test1"<<endl;
 
     for(auto it = gWorld.begin(); it!=gWorld.end(); ++it)
     {
         (*it)->update();
     }
 
+    if(gNewBots.size())
+    {
+        for(int i = 0; i< gNewBots.size();i++)
+            gBots.push_back(gNewBots[i]);
+        gNewBots.clear();
+
+    }
 
 }
 
@@ -69,6 +82,7 @@ int main()
     SDL_Event event;
 
     renderer::Instance()->Init({1000,1000},"neuralbot 2");
+    renderer::Instance()->scale_ = 3;
 
     WorldInit();
 
