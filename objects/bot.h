@@ -12,6 +12,7 @@
 #include"food.h"
 #include"../observer/subject.h"
 #include"../observer/stats.h"
+#include"../actions/actionManager.h"
 
 using namespace FANN;
 using namespace std;
@@ -62,10 +63,12 @@ class bot: public object
         fann_type **nnet_TrainIn_;
         fann_type **nnet_TrainOut_;
 
+        actionManager actionM_;
+
 
         const static unsigned nnet_TrainSteps_ = 100;
          unsigned nnet_nInputs_ = 2;
-        const static unsigned nnet_nOutputs_ = 4;
+        const static unsigned nnet_nOutputs_ = 8;
         void clone();
 
         void kill();

@@ -12,6 +12,7 @@ bot::bot(Coord Pos)
 {
     Pos_ = Pos;
     Vel_ = {0,0};
+    Direction_ = {1,0};
     init();
 }
 bot::bot(const bot &rhs)
@@ -127,9 +128,14 @@ void bot::update()
     }
     fann_type *nnet_out = nnet_->run(nnet_input);
 
-    Vel_ = Coord(nnet_out[0], nnet_out[1]);
-    Direction_ = Coord(nnet_out[2], nnet_out[3]).unit();
-    Pos_+=Vel_;
+    //Vel_ = Coord(nnet_out[0], nnet_out[1]);
+
+    actionM_.ChoseAction(*this, nnet_nOutputs_, nnet_out);
+    if(Vel_.abs()>2)
+        Vel_=2*Vel_.unit();
+    //cout<<Vel_<< "\t // "<<Direction_<<endl;
+    //Direction_ = Vel_;//Coord(nnet_out[2], nnet_out[3]).unit();
+    Pos_+=0.5*Vel_;
     //Direction_ = Vel_.unit();
 //    Direction_.rotate(0.005);
 
