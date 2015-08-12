@@ -1,9 +1,9 @@
 #ifndef _OBJECT_H
 #define _OBJECT_H
 
-#include"color.h"
-#include"Coord.h"
-#include"renderer.h"
+#include"../tools/color.h"
+#include"../tools/Coord.h"
+#include"../tools/renderer.h"
 
 class object
 {

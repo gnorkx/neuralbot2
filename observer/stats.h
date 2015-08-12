@@ -6,7 +6,7 @@
 
 
 #include "observer.h"
-#include "bot.h"
+#include "../objects/bot.h"
 
 
 class stats : public observer

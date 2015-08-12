@@ -4,9 +4,9 @@
 #include "sensor.h"
 #include <vector>
 #include <algorithm>
-#include "color.h"
-#include "object.h"
-#include "bot.h"
+#include "../tools/color.h"
+#include "../objects/object.h"
+#include "../objects/bot.h"
 
 
 class rgba_vision : public sensor

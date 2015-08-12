@@ -2,16 +2,16 @@
 #define _BOT_H
 
 #include<vector>
-#include"Coord.h"
+#include"../tools/Coord.h"
 #include"object.h"
-#include"sensor.h"
-#include"toolbox.h"
+#include"../sensors/sensor.h"
+#include"../tools/toolbox.h"
 #include"doublefann.h"
 #include"fann_cpp.h"
 
 #include"food.h"
-#include"subject.h"
-#include"stats.h"
+#include"../observer/subject.h"
+#include"../observer/stats.h"
 
 using namespace FANN;
 using namespace std;
@@ -70,6 +70,8 @@ class bot: public object
 
         void kill();
         bot* newChild();
+
+        static const unsigned LIFE_REDUCTION;
 
 
 

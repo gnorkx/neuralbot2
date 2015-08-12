@@ -7,7 +7,7 @@ extern std::vector<bot*> gBots;
 rgba_vision::rgba_vision()
 {
     //ctor
-    nPixel_ = 50;
+    nPixel_ = 30;
 
     nVal_ = nPixel_*3;
     openingAngle_ = 0.25*M_PI;

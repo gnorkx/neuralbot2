@@ -2,7 +2,7 @@
 #define _FOOD_H
 
 #include "object.h"
-#include "subject.h"
+#include "../observer/subject.h"
 
 
 class food: public object
@@ -23,5 +23,5 @@ class food: public object
     private:
     int inactiveCounter_;
 };
-#include "stats.h"
+#include "../observer/stats.h"
 #endif // _FOOD_H

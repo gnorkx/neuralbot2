@@ -1,8 +1,8 @@
 #ifndef OBSERVER_H
 #define OBSERVER_H
 
-#include "object.h"
-#include "event.h"
+#include "../objects/object.h"
+
 
 class observer
 {

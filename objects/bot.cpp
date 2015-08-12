@@ -1,10 +1,13 @@
 #include "bot.h"
-#include "rgba_vision.h"
-#include "simple_eyes.h"
+#include "../sensors/rgba_vision.h"
+#include "../sensors/simple_eyes.h"
+#include "../sensors/status_feedback.h"
+
 
 extern vector<object*> gWorld;
 extern vector<bot*> gNewBots;
 
+const unsigned bot::LIFE_REDUCTION = 0.002;
 bot::bot(Coord Pos)
 {
     Pos_ = Pos;
@@ -112,23 +115,21 @@ void bot::update()
     int nVal =0;
     float *Values = nullptr;
     fann_type nnet_input[nSensorOut_];
-
-    Coord DistClosest;
+    int iValTotal = 0;
     for(auto it = sensors_.begin(); it!= sensors_.end();++it)
     {
         (*it)->update(*this, nVal, Values);
 
-    }
-    DistClosest = {Values[0],Values[1]};
-    for(int i = 0; i<nVal; i++)
-    {
-        nnet_input[i] = Values[i];
+        for(int i = 0; i<nVal; i++, iValTotal)
+        {
+            nnet_input[iValTotal] = Values[i];
+        }
     }
     fann_type *nnet_out = nnet_->run(nnet_input);
 
     Vel_ = Coord(nnet_out[0], nnet_out[1]);
     Direction_ = Coord(nnet_out[2], nnet_out[3]).unit();
-    Pos_+=2*Vel_;
+    Pos_+=Vel_;
     //Direction_ = Vel_.unit();
 //    Direction_.rotate(0.005);
 
@@ -157,22 +158,34 @@ void bot::update()
     if(TouchedFood)
     {
         eat((food*)TouchedFood);
-        learn();
+       // learn();
 //        bot* b = newChild();
 //        delete b;
         gNewBots.push_back(newChild());
     }
+    Life_ -= LIFE_REDUCTION;
+    if(Life_<0)
+    {
+        kill();
+        return;
+    }
+    if(Lifetime_ > 2*MaxLife_/LIFE_REDUCTION)
+    {
+        if(rnd()>exp(-Lifetime_ +  2*MaxLife_/LIFE_REDUCTION))
+        {
+            kill();
+            return;
+        }
+    }
 
-    Life_ -= 0.002;
-    if(Life_<0) kill();
 
     renderer::Instance()->Circle(Pos_, size_, c_);
 
     Coord FOVA = Direction_; FOVA.rotate(-0.25*M_PI);
     Coord FOVB = Direction_; FOVB.rotate(0.25*M_PI);
    // cout<<FOVA<<"//////"<<FOVB<<endl;
-    renderer::Instance()->Line(Pos_, 10*FOVA+Pos_,{255,255,0});
-    renderer::Instance()->Line(Pos_, 10*FOVB+Pos_,{255,255,0});
+    renderer::Instance()->Line(Pos_, 10*FOVA+Pos_,{200,200,0});
+    renderer::Instance()->Line(Pos_, 10*FOVB+Pos_,{200,200,0});
 //    renderer::Instance()->Line(Pos_, 10*(Pos_+Direction_-Direction_.perp()),{255,255,255});
 
 
@@ -233,6 +246,9 @@ void bot::init()
     Life_ = MaxLife_ =1.;
     active_ = 1;
     sensors_.push_back(new simple_eyes);
+
+    //sensors_.push_back(new status_feedback);
+    //sensors_.push_back(new rgba_vision);
 
     nSensorOut_ = 0;
     for(auto it = sensors_.begin(); it!= sensors_.end(); ++it)

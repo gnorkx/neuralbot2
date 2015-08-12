@@ -2,7 +2,7 @@
 #define SIMPLE_EYES_H
 
 #include "sensor.h"
-#include "bot.h"
+#include "../objects/bot.h"
 #include <algorithm>
 
 
