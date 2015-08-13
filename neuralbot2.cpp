@@ -35,6 +35,7 @@ int iFrame = 0;
 vector<object*> gWorld;
 vector<bot*> gBots;
 vector<bot*> gNewBots;
+bot* gBestBot;
 
 void WorldInit()
 {
@@ -43,7 +44,7 @@ void WorldInit()
 
     for(int i = 0; i< 200;i++)
     {
-        gWorld.push_back(new food({rnd0(150),rnd0(150)},1.));
+        gWorld.push_back(new food({rnd0(300),rnd0(300)},1.));
         ((food*)gWorld[i])->subject_.notify(gWorld[i],stats::event::active);
     }
 //    gWorld.push_back(new food({5,5},1.));
@@ -58,6 +59,7 @@ void WorldInit()
    //gBots[0]->Direction_ = {1,1};
  //   gBots[0]->Vel_ = {0,0.1};
 
+    gBestBot = new bot({0,0});
 
 }
 
@@ -78,10 +80,38 @@ void Frame( void )
     }
 
 
-    if(iFrame%10000 == 0)
+    if(iFrame%100 == 0)
     {
         iFrame = 0;
+        //cleanup
+        //cout<<"cleanup"<<endl;
         gBots.erase(std::remove_if(gBots.begin(), gBots.end(), [](const bot *b){return !b->active_;}), gBots.end());
+
+        //get fittest bots
+        //partial_sort(gBots.begin(), gBots.begin()+2, gBots.end(), [](const bot *a, const bot *b){return a->GetFitness()>b->GetFitness();});
+        bot* tmpBot = gBots[0];
+        for(auto it : gBots)
+            if(it->GetFitness() > tmpBot->GetFitness())
+                tmpBot = &(*it);
+        if(tmpBot->GetFitness() > gBestBot->GetFitness())
+        {
+            delete gBestBot;
+            gBestBot = new bot(*tmpBot);
+            cout<<"new Best Bot: "<<gBestBot->GetFitness()<<endl;
+        }
+
+        if(gBots.size()<20)
+        for(int i = gBots.size(); i< 20; i++)
+        {
+            bot* nBot = new bot(*gBestBot);
+            nBot->Lifetime_ = 0;
+            nBot->mutate();
+            nBot->Pos_ = {rnd0(70),rnd0(70)};
+
+            gNewBots.push_back(nBot);
+            //cout<<"new Bot "<<gNewBots.size()<<endl;
+        }
+
     }
     if(gNewBots.size())
     {

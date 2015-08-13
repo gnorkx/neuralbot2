@@ -7,7 +7,7 @@
 extern vector<object*> gWorld;
 extern vector<bot*> gNewBots;
 
-const unsigned bot::LIFE_REDUCTION = 0.002;
+const float bot::LIFE_REDUCTION = 0.004;
 bot::bot(Coord Pos)
 {
     Pos_ = Pos;
@@ -135,7 +135,7 @@ void bot::update()
         Vel_=2*Vel_.unit();
     //cout<<Vel_<< "\t // "<<Direction_<<endl;
     //Direction_ = Vel_;//Coord(nnet_out[2], nnet_out[3]).unit();
-    Pos_+=0.5*Vel_;
+    Pos_+=0.75*Vel_;
     //Direction_ = Vel_.unit();
 //    Direction_.rotate(0.005);
 
@@ -170,6 +170,7 @@ void bot::update()
         gNewBots.push_back(newChild());
     }
     Life_ -= LIFE_REDUCTION;
+    //cout<<"Life: "<<Life_<<endl;
     if(Life_<0)
     {
         kill();
@@ -292,9 +293,9 @@ void bot::kill()
 
 void bot::mutate()
 {
-    MaxLife_ += MaxLife_*norm(0.05);
-    if(MaxLife_<0.3) MaxLife_ = 0.3;
-    if(Life_>MaxLife_) Life_ = MaxLife_;
+   // MaxLife_ += MaxLife_*norm(0.05);
+    //if(MaxLife_<0.3) MaxLife_ = 0.3;
+    //if(Life_>MaxLife_) Life_ = MaxLife_;
 
 
     connection* weights = new connection[nnet_->get_total_connections()];
@@ -302,7 +303,7 @@ void bot::mutate()
 
     for (unsigned i = 0; i< nnet_->get_total_connections();i++)
     {
-        weights[i].weight=weights[i].weight*(1)+norm(0.5);
+        weights[i].weight=weights[i].weight*(1+norm(0.9));
     }
     nnet_->set_weight_array(weights, nnet_->get_total_connections());
 
@@ -319,4 +320,12 @@ bot* bot::newChild()
     newBot->mutate();
     subject_.notify(newBot,stats::event::born);
     return newBot;
+}
+
+float bot::GetFitness() const
+{
+    float fitness = 0;
+    fitness += Lifetime_;
+    fitness += Life_/LIFE_REDUCTION;
+    return fitness;
 }

@@ -48,9 +48,12 @@ class bot: public object
 //    bot* operator=(bot&&);
 
     ~bot();
+
+    float GetFitness() const;
+
     subject subject_;
-    protected:
-        void mutate();
+
+    void mutate();
 
     private:
         void copy_bot(const bot&); //copy non-dynamic members
@@ -74,7 +77,7 @@ class bot: public object
         void kill();
         bot* newChild();
 
-        static const unsigned LIFE_REDUCTION;
+        static const float LIFE_REDUCTION;
 
 
 
