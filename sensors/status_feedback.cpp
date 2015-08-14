@@ -15,6 +15,11 @@ status_feedback::~status_feedback()
 
 }
 
+sensor* status_feedback::clone() const
+{
+    return new status_feedback();
+}
+
 
 void status_feedback::update(const bot &b, int &nVal, float* &values)
 {

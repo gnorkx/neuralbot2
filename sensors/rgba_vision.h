@@ -17,6 +17,7 @@ class rgba_vision : public sensor
         rgba_vision();
         ~rgba_vision();
         void update(const bot&, int&, float*&);
+        virtual sensor* clone() const;
     protected:
     private:
     float openingAngle_;

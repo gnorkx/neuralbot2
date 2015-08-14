@@ -19,6 +19,11 @@ simple_eyes::simple_eyes(const simple_eyes &rhs)
     value_ = new float[nVal_];
 }
 
+sensor* simple_eyes::clone() const
+{
+    return new simple_eyes();
+}
+
 void simple_eyes::update(const bot &bot_, int &nVal, float *&Value)
 {
 

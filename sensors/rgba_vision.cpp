@@ -21,6 +21,11 @@ rgba_vision::~rgba_vision()
     delete[] value_;
 }
 
+sensor* rgba_vision::clone() const
+{
+    return new rgba_vision();
+}
+
 void rgba_vision::update(const bot &bot_, int &nVal, float *&Value)
 {
     color cArray_[nPixel_];
