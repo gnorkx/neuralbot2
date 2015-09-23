@@ -10,7 +10,7 @@ actionManager::actionManager()
     //ctor
     actionList_.clear();
     actionList_.push_back(new move);
-    actionList_.push_back(new view);
+    //actionList_.push_back(new view);
 
     nMaxRepresentations_=0;
     for(auto it : actionList_)
@@ -45,7 +45,7 @@ void actionManager::ChoseAction(bot& b, int nnnet_out, double* nnet_out)
 int actionManager::GetMax(int idx, double* nnet_out)
 {
 
-   /* double fmax= -1e10;
+    double fmax= -1e10;
     int imax = -1;
     for(int i = 0 ; i<idx; i++)
     {
@@ -56,10 +56,10 @@ int actionManager::GetMax(int idx, double* nnet_out)
         }
     }
     return std::max(0,imax);
-*/
+
 
     //alternative (Probability)
-
+/*
     double *fnew = new double[idx];
     for(int i = 0; i< idx; i++)
         fnew[i] = exp(nnet_out[i]);
@@ -77,4 +77,5 @@ int actionManager::GetMax(int idx, double* nnet_out)
         else return i;
     }
     return idx;
+    */
 }

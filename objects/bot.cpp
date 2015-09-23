@@ -20,8 +20,11 @@ bot::bot(const bot &rhs)
     copy_bot(rhs);
     copy_nn(rhs);
 
- //   sensors_ = rhs.sensors_; //need to clone sensor objects..s.?
-    sensors_.push_back(new rgba_vision);
+
+
+    for(sensor* s : rhs.sensors_)
+        sensors_.push_back(s->clone());
+
     nnet_TrainIn_ = new fann_type*[nnet_TrainSteps_];
     nnet_TrainOut_ = new fann_type*[nnet_TrainSteps_];
     for(int i = 0; i<nnet_TrainSteps_; i++)
@@ -164,10 +167,10 @@ void bot::update()
     if(TouchedFood)
     {
         eat((food*)TouchedFood);
-       // learn();
+        learn();
 //        bot* b = newChild();
 //        delete b;
-        gNewBots.push_back(newChild());
+ //       gNewBots.push_back(newChild());
     }
     Life_ -= LIFE_REDUCTION;
     //cout<<"Life: "<<Life_<<endl;
@@ -191,8 +194,8 @@ void bot::update()
     Coord FOVA = Direction_; FOVA.rotate(-0.25*M_PI);
     Coord FOVB = Direction_; FOVB.rotate(0.25*M_PI);
    // cout<<FOVA<<"//////"<<FOVB<<endl;
-    renderer::Instance()->Line(Pos_, 10*FOVA+Pos_,{200,200,0});
-    renderer::Instance()->Line(Pos_, 10*FOVB+Pos_,{200,200,0});
+   // renderer::Instance()->Line(Pos_, 10*FOVA+Pos_,{200,200,0});
+    //renderer::Instance()->Line(Pos_, 10*FOVB+Pos_,{200,200,0});
 //    renderer::Instance()->Line(Pos_, 10*(Pos_+Direction_-Direction_.perp()),{255,255,255});
 
 

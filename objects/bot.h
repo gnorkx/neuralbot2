@@ -71,7 +71,7 @@ class bot: public object
 
         const static unsigned nnet_TrainSteps_ = 100;
          unsigned nnet_nInputs_ = 2;
-        const static unsigned nnet_nOutputs_ = 8;
+        const static unsigned nnet_nOutputs_ = 4;
         void clone();
 
         void kill();
