@@ -9,6 +9,7 @@ class sensor
     public:
     virtual void update(const bot&, int&, float*&) =0;
     virtual ~sensor(){};
+    virtual sensor* clone() const{};
 
     int nVal_;
 

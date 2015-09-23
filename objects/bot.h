@@ -12,6 +12,7 @@
 #include"food.h"
 #include"../observer/subject.h"
 #include"../observer/stats.h"
+#include"../actions/actionManager.h"
 
 using namespace FANN;
 using namespace std;
@@ -47,9 +48,12 @@ class bot: public object
 //    bot* operator=(bot&&);
 
     ~bot();
+
+    float GetFitness() const;
+
     subject subject_;
-    protected:
-        void mutate();
+
+    void mutate();
 
     private:
         void copy_bot(const bot&); //copy non-dynamic members
@@ -62,6 +66,8 @@ class bot: public object
         fann_type **nnet_TrainIn_;
         fann_type **nnet_TrainOut_;
 
+        actionManager actionM_;
+
 
         const static unsigned nnet_TrainSteps_ = 100;
          unsigned nnet_nInputs_ = 2;
@@ -71,7 +77,7 @@ class bot: public object
         void kill();
         bot* newChild();
 
-        static const unsigned LIFE_REDUCTION;
+        static const float LIFE_REDUCTION;
 
 
 

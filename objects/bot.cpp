@@ -7,11 +7,12 @@
 extern vector<object*> gWorld;
 extern vector<bot*> gNewBots;
 
-const unsigned bot::LIFE_REDUCTION = 0.002;
+const float bot::LIFE_REDUCTION = 0.004;
 bot::bot(Coord Pos)
 {
     Pos_ = Pos;
     Vel_ = {0,0};
+    Direction_ = {1,0};
     init();
 }
 bot::bot(const bot &rhs)
@@ -19,8 +20,11 @@ bot::bot(const bot &rhs)
     copy_bot(rhs);
     copy_nn(rhs);
 
- //   sensors_ = rhs.sensors_; //need to clone sensor objects..s.?
-    sensors_.push_back(new rgba_vision);
+
+
+    for(sensor* s : rhs.sensors_)
+        sensors_.push_back(s->clone());
+
     nnet_TrainIn_ = new fann_type*[nnet_TrainSteps_];
     nnet_TrainOut_ = new fann_type*[nnet_TrainSteps_];
     for(int i = 0; i<nnet_TrainSteps_; i++)
@@ -127,9 +131,14 @@ void bot::update()
     }
     fann_type *nnet_out = nnet_->run(nnet_input);
 
-    Vel_ = Coord(nnet_out[0], nnet_out[1]);
-    Direction_ = Coord(nnet_out[2], nnet_out[3]).unit();
-    Pos_+=Vel_;
+    //Vel_ = Coord(nnet_out[0], nnet_out[1]);
+
+    actionM_.ChoseAction(*this, nnet_nOutputs_, nnet_out);
+    if(Vel_.abs()>2)
+        Vel_=2*Vel_.unit();
+    //cout<<Vel_<< "\t // "<<Direction_<<endl;
+    //Direction_ = Vel_;//Coord(nnet_out[2], nnet_out[3]).unit();
+    Pos_+=0.75*Vel_;
     //Direction_ = Vel_.unit();
 //    Direction_.rotate(0.005);
 
@@ -158,12 +167,13 @@ void bot::update()
     if(TouchedFood)
     {
         eat((food*)TouchedFood);
-       // learn();
+        learn();
 //        bot* b = newChild();
 //        delete b;
-        gNewBots.push_back(newChild());
+ //       gNewBots.push_back(newChild());
     }
     Life_ -= LIFE_REDUCTION;
+    //cout<<"Life: "<<Life_<<endl;
     if(Life_<0)
     {
         kill();
@@ -184,8 +194,8 @@ void bot::update()
     Coord FOVA = Direction_; FOVA.rotate(-0.25*M_PI);
     Coord FOVB = Direction_; FOVB.rotate(0.25*M_PI);
    // cout<<FOVA<<"//////"<<FOVB<<endl;
-    renderer::Instance()->Line(Pos_, 10*FOVA+Pos_,{200,200,0});
-    renderer::Instance()->Line(Pos_, 10*FOVB+Pos_,{200,200,0});
+   // renderer::Instance()->Line(Pos_, 10*FOVA+Pos_,{200,200,0});
+    //renderer::Instance()->Line(Pos_, 10*FOVB+Pos_,{200,200,0});
 //    renderer::Instance()->Line(Pos_, 10*(Pos_+Direction_-Direction_.perp()),{255,255,255});
 
 
@@ -286,9 +296,9 @@ void bot::kill()
 
 void bot::mutate()
 {
-    MaxLife_ += MaxLife_*norm(0.05);
-    if(MaxLife_<0.3) MaxLife_ = 0.3;
-    if(Life_>MaxLife_) Life_ = MaxLife_;
+   // MaxLife_ += MaxLife_*norm(0.05);
+    //if(MaxLife_<0.3) MaxLife_ = 0.3;
+    //if(Life_>MaxLife_) Life_ = MaxLife_;
 
 
     connection* weights = new connection[nnet_->get_total_connections()];
@@ -296,7 +306,7 @@ void bot::mutate()
 
     for (unsigned i = 0; i< nnet_->get_total_connections();i++)
     {
-        weights[i].weight=weights[i].weight*(1)+norm(0.5);
+        weights[i].weight=weights[i].weight*(1+norm(0.9));
     }
     nnet_->set_weight_array(weights, nnet_->get_total_connections());
 
@@ -313,4 +323,12 @@ bot* bot::newChild()
     newBot->mutate();
     subject_.notify(newBot,stats::event::born);
     return newBot;
+}
+
+float bot::GetFitness() const
+{
+    float fitness = 0;
+    fitness += Lifetime_;
+    fitness += Life_/LIFE_REDUCTION;
+    return fitness;
 }

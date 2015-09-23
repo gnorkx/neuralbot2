@@ -17,6 +17,8 @@ class simple_eyes : public sensor
         simple_eyes(const simple_eyes&);
         ~simple_eyes();
 
+    virtual sensor* clone() const;
+
     protected:
     private:
 

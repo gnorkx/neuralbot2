@@ -10,6 +10,7 @@ class status_feedback : public sensor
         status_feedback();
         ~status_feedback();
         void update(const bot&, int&, float*&);
+        virtual sensor* clone() const;
     protected:
     private:
 
